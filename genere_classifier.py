@@ -73,8 +73,9 @@ def read_data__():
     print(data)
 
 
+#ova funkcija je koristena samo da bi izlistali zanrove koji se najcesce pojavljuju u "other" kako bi ih mogli dodati u generalne zarove
 def count_occurances(true_df, generalized_df):
-    ocurrances = {}
+    occurrences = {}
     for index, generalized_genre in generalized_df.items():
         if generalized_genre == "other":
             genre_in_true = true_df[index]
@@ -82,8 +83,13 @@ def count_occurances(true_df, generalized_df):
             for index, specific_genre in true_df.items():
                 if genre_in_true in specific_genre:
                     count = count + 1
-            ocurrances[genre_in_true] = count
-    return ocurrances
+            occurrences[genre_in_true] = count
+    
+    df_occ = pd.DataFrame(occurrences, index=[0])
+    df_occ = df_occ.T
+    df_occ = df_occ.rename(columns={0: 'col1'})
+    df_occ = df_occ.sort_values(by='col1')
+    return df_occ
 
 if __name__ == "__main__":
     pd.options.mode.chained_assignment = None
@@ -96,38 +102,4 @@ if __name__ == "__main__":
     print(y_train.nunique())
     print(len(x_train))
     print(len(y_train))
-
-    true_df = pd.Series(data['genres'])
-    generalized_df = y_train
-    #dict_occ = count_occurances(true_df, generalized_df)
-    #print(dict_occ)
-    #df_occ = pd.DataFrame(dict_occ, index=[0])
-    #df_occ.sort
-    df_occ = pd.read_pickle('occ.pkl')
-    df_occ = df_occ.T
-    print(df_occ)
-    #df_occ.T
-    #df_occ.to_pickle("occ.pkl")
-    df_occ = df_occ.rename(columns={0: 'col1'})
-
-    df_occ = df_occ.sort_values(by='col1')
-    df_occ.to_csv("occ.csv")
     
-
-
-
-
-
-    """ ss = data['genres'].str.contains('a cappella')
-    dd = data['instrumentalness']
-    i=0
-    for x in ss:
-        i = i + 1
-        if x == True:
-            print(data['genres'][i])
-    i = 0
-    for x in dd:
-        i = i + 1
-        if x > 0.8:
-            print(data['genres'][i]) """
-    #print(data.to_string().encode('utf-8'))
