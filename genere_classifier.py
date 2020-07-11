@@ -9,6 +9,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from sklearn.neighbors.classification import KNeighborsClassifier
+from sklearn.svm import SVC
 
 
 def read_data(data: pd.DataFrame):
@@ -39,9 +40,9 @@ def read_data(data: pd.DataFrame):
     for generic_genre in generic_genres:
         hist_x.append(generic_genre)
         hist_y.append(y.eq(generic_genre).sum())
-        print(generic_genre)
-        print(y.eq(generic_genre).sum())
-        print("\n")
+        #print(generic_genre)
+        #print(y.eq(generic_genre).sum())
+        #print("\n")
     # We can set the number of bins with the `bins` kwarg
     print(hist_y)
     plt.hist(hist_y, bins=len(hist_y))
@@ -95,18 +96,26 @@ if __name__ == "__main__":
     print(y_train.nunique())
     print(len(x_train))
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, stratify=y_train, test_size=0.25)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, stratify=y_train, test_size=0.4)
     print(y_train.nunique())
     print(y_test.nunique())
 
     print(len(x_train))
-    print(len(y_train))
+    print(len(x_test))
 
-     #classifier =  svm.SVC(kernel='linear',gamma=0.01, C=0.01)
-    rfc = RandomForestClassifier(n_estimators=200, criterion='gini', max_features='auto', max_depth=100, random_state=7)
-    #rfc = KNeighborsClassifier(n_neighbors=100, weights='uniform', algorithm='auto')
-    #rfc = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=3), n_estimators=2)
-    rfc.fit(x_train, y_train)
-    y_pred = rfc.predict(x_test)
+    
+    """ 
+    pca = PCA(n_components=3)
+    pca.fit(x_train)
+    x_train = pca.transform(x_train)
+    x_test = pca.transform(x_test)
+
+    """
+    #classifier =  SVC(kernel='linear',gamma=0.01, C=0.01)
+    classifier = RandomForestClassifier(n_estimators=300, criterion='gini', max_features='auto', max_depth=200, random_state=7)
+    #classifier = KNeighborsClassifier(n_neighbors=300, weights='uniform', algorithm='auto')
+    #classifier = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=3), n_estimators=4)
+    classifier.fit(x_train, y_train)
+    y_pred = classifier.predict(x_test)
     acc = accuracy_score(y_test, y_pred)
     print(acc)
