@@ -1,12 +1,14 @@
 import pandas as pd
 import numpy as np
 import ast
-from sklearn import preprocessing, mixture
-from sklearn.metrics import v_measure_score
-from sklearn.mixture import GaussianMixture
+from sklearn.decomposition import PCA
+from sklearn.tree import DecisionTreeClassifier  
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from matplotlib.patches import Ellipse
 import matplotlib.pyplot as plt
+from sklearn.neighbors.classification import KNeighborsClassifier
 
 
 def read_data(data: pd.DataFrame):
@@ -18,7 +20,7 @@ def read_data(data: pd.DataFrame):
     # "jazz", "pop", "dub", "adult standards", "chill", "rock", "punk", "metal", "broadway", "latin", "reggae", "rap", "disco"]
 
     generic_genres = ["blues", "banda", "electro", "house", "dance", "swing" , "orchestra", "cumbia" , "dub", "gospel", "bebop", "bolero", "hardcore", "chanson" ,"adult standards" , "broadway" , "chill" , "classical" , "comedy" , "country", "disco" , "edm" , "emo" , "folk" , "funk" , "hip hop" , "indie" , "jazz" , "latin" , "metal" , "pop" , "punk" , "r&b" , "rap" , "reggae" , "rock" , "soul" , "soundtrack" , "worship"]
-    print(y)
+
     for index, specific_genre in y.items():
         found = False
         for generic_genre_word in generic_genres:
@@ -32,7 +34,6 @@ def read_data(data: pd.DataFrame):
             y[index] = "other"
     generic_genres.append("other")
     
-    print(y)
     hist_x = []
     hist_y =[]
     for generic_genre in generic_genres:
@@ -47,14 +48,6 @@ def read_data(data: pd.DataFrame):
     #plt.show()
     return x, y
 
-"""     Breakbeat.
-Chiptune.
-Downtempo.
-Drum and bass.
-Dub.
-Dubstep.
-Electro.
-Electronica. """
 
 def read_data__():
     #za_poslije_jer_sam_sacuvao_pickle
@@ -101,5 +94,19 @@ if __name__ == "__main__":
     print(x_train)
     print(y_train.nunique())
     print(len(x_train))
+
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, stratify=y_train, test_size=0.25)
+    print(y_train.nunique())
+    print(y_test.nunique())
+
+    print(len(x_train))
     print(len(y_train))
-    
+
+     #classifier =  svm.SVC(kernel='linear',gamma=0.01, C=0.01)
+    rfc = RandomForestClassifier(n_estimators=200, criterion='gini', max_features='auto', max_depth=100, random_state=7)
+    #rfc = KNeighborsClassifier(n_neighbors=100, weights='uniform', algorithm='auto')
+    #rfc = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=3), n_estimators=2)
+    rfc.fit(x_train, y_train)
+    y_pred = rfc.predict(x_test)
+    acc = accuracy_score(y_test, y_pred)
+    print(acc)
