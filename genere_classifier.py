@@ -1,26 +1,40 @@
 import pandas as pd
 import numpy as np
 import ast
+
 from sklearn.decomposition import PCA
 from sklearn.tree import DecisionTreeClassifier  
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
 from sklearn.neighbors.classification import KNeighborsClassifier
 from sklearn.svm import SVC
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.feature_selection import SelectFromModel
+
+import seaborn as sb
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LogisticRegression
 
 
 def read_data(data: pd.DataFrame):
     x = data[
         ["danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness",
-         "valence", "tempo", "key", "mode"]]
+         "valence", "tempo", "key", "mode", "popularity"]]
     y = data['genres'].str.lower()
     #generic_genres = [ "blues", "r&b", "classical", "country", "dance", "house", "hip hop", "indie",
     # "jazz", "pop", "dub", "adult standards", "chill", "rock", "punk", "metal", "broadway", "latin", "reggae", "rap", "disco"]
 
     generic_genres = ["blues", "banda", "electro", "house", "dance", "swing" , "orchestra", "cumbia" , "dub", "gospel", "bebop", "bolero", "hardcore", "chanson" ,"adult standards" , "broadway" , "chill" , "classical" , "comedy" , "country", "disco" , "edm" , "emo" , "folk" , "funk" , "hip hop" , "indie" , "jazz" , "latin" , "metal" , "pop" , "punk" , "r&b" , "rap" , "reggae" , "rock" , "soul" , "soundtrack" , "worship"]
+
+    
+    df_occ = pd.read_pickle('occ.pkl')
+    df_occ_striped = df_occ[df_occ['col1'] > 50]
+    df_occ_striped_list = df_occ_striped.index.tolist()
+
+    for item in df_occ_striped_list:
+        generic_genres.append(item)
 
     for index, specific_genre in y.items():
         found = False
@@ -39,14 +53,23 @@ def read_data(data: pd.DataFrame):
     hist_y =[]
     for generic_genre in generic_genres:
         hist_x.append(generic_genre)
+        print(generic_genre)
+        print(y.eq(generic_genre).sum())
         hist_y.append(y.eq(generic_genre).sum())
-        #print(generic_genre)
-        #print(y.eq(generic_genre).sum())
-        #print("\n")
-    # We can set the number of bins with the `bins` kwarg
-    print(hist_y)
-    plt.hist(hist_y, bins=len(hist_y))
-    #plt.show()
+    
+    y.hist()
+    plt.show
+     
+    """ plt.scatter(x['danceability'], x['energy'], s=1, alpha=0.5)
+    plt.show()
+    plt.scatter(x['acousticness'], x['speechiness'], s=1, alpha=0.5)
+    plt.show()
+    plt.scatter(x['energy'], x['mode'], s=1, alpha=0.5)
+    plt.show()
+    plt.scatter(x['danceability'], x['tempo'], s=1, alpha=0.5)
+    plt.show() """
+    
+
     return x, y
 
 
@@ -92,28 +115,54 @@ if __name__ == "__main__":
     print(len(data))
     print(len(data['genres'].unique().tolist()))
     x_train, y_train = read_data(data)
-    print(x_train)
     print(y_train.nunique())
     print(len(x_train))
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, stratify=y_train, test_size=0.4)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, stratify=y_train, test_size=0.2)
     print(y_train.nunique())
     print(y_test.nunique())
 
     print(len(x_train))
     print(len(x_test))
 
-    
+
     """ 
+    #HEATMAP
+    fig = plt.figure(figsize=(13,6))
+    labels = x_train.columns.tolist()
+    ax1 = fig.add_subplot(111)
+    ax1.set_xticklabels(labels,rotation=90, fontsize=10)
+    ax1.set_yticklabels(labels,fontsize=10)
+    plt.imshow(x_train.corr(), cmap='hot', interpolation='nearest')
+    plt.colorbar()
+    ax1.set_xticks(np.arange(len(labels)))
+    ax1.set_yticks(np.arange(len(labels)))
+    plt.show()
+
+
+
+
+    
     pca = PCA(n_components=3)
     pca.fit(x_train)
     x_train = pca.transform(x_train)
     x_test = pca.transform(x_test)
+    """
 
     """
+    #REGRESSION
+    sel = SelectFromModel(LogisticRegression(penalty='l1', C=100))
+    sel.fit(x_train, y_train)
+    print(sel.get_support())
+
+    x_train = sel.transform(x_train)
+    x_test = sel.transform(x_test)
+    """
+
     #classifier =  SVC(kernel='linear',gamma=0.01, C=0.01)
-    classifier = RandomForestClassifier(n_estimators=300, criterion='gini', max_features='auto', max_depth=200, random_state=7)
-    #classifier = KNeighborsClassifier(n_neighbors=300, weights='uniform', algorithm='auto')
+    #classifier = GradientBoostingClassifier(max_depth=3, n_estimators=700)
+    classifier = RandomForestClassifier(n_estimators=300, criterion='gini', max_features='auto', max_depth=200)
+    #classifier = KNeighborsClassifier(n_neighbors=1)
     #classifier = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=3), n_estimators=4)
     classifier.fit(x_train, y_train)
     y_pred = classifier.predict(x_test)
