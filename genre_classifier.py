@@ -31,7 +31,7 @@ def read_data(data: pd.DataFrame):
     #generic_genres = [ "blues", "r&b", "classical", "country", "dance", "house", "hip hop", "indie",
     # "jazz", "pop", "dub", "adult standards", "chill", "rock", "punk", "metal", "broadway", "latin", "reggae", "rap", "disco"]
 
-    generic_genres = ["blues", "banda", "electro", "house", "dance", "swing" , "orchestra", "cumbia" , "dub", "gospel", "bebop", "bolero", "hardcore", "chanson" ,"adult standards" , "broadway" , "chill" , "classical" , "comedy" , "country", "disco" , "edm" , "emo" , "folk" , "funk" , "hip hop" , "indie" , "jazz" , "latin" , "metal" , "pop" , "punk" , "r&b" , "rap" , "reggae" , "rock" , "soul" , "psy", "soundtrack" , "worship"]
+    generic_genres = ["blues", "banda", "electro", "house", "dance", "swing" , "orchestra", "cumbia" , "dub", "gospel", "bebop", "bolero", "hardcore", "chanson" ,"adult standards" , "broadway" , "chill" , "classical" , "comedy" , "country", "disco" , "edm" , "emo" , "folk" , "funk" , "hip hop" , "indie" , "jazz" , "metal" , "pop" , "punk" , "r&b" , "rap" , "reggae" , "rock" , "soul" , "psy", "soundtrack" , "worship"]
 
     
     df_occ = pd.read_pickle('occ.pkl')
@@ -124,21 +124,21 @@ def read_genres():
     print("NUM OF OTHERS: ")
     print(sum_others)
     print("-"*12)
-    print(word_dict)
-    with open('test.csv', 'w') as f:
-        w = csv.DictWriter(f, word_dict.keys())
-        w.writeheader()
-        w.writerow(word_dict)
+    #print(word_dict)
+    #with open('test.csv', 'w') as f:
+    #    w = csv.DictWriter(f, word_dict.keys())
+    #    w.writeheader()
+    #    w.writerow(word_dict)
 
     data.to_pickle('data.pkl')
-    print(data)
 
 
 #najrelevantiniji zanr za odredjenu pjesmu
 #prolazi kroz listu svih zanrova i gleda koliko puta se pojavljuje jedan od generickih zanrova u zanrovima koji su opsti za ovu pjesmu, potom uzima max i vraca najrelevantniji zanr iz skupa generickih
 def find_most_relevant_genre(genres: list): 
-    generic_genres = ["blues", "trap", "electro", "house", "dance", "swing" , "orchestra", "cumbia" , "dub", "gospel", "bebop", "bolero", "hardcore", "chanson" ,"adult standards" , "broadway" , "chill" , "classical" , "comedy" , "country", "disco" , "edm" , "emo" , "folk" , "funk" , "hip hop" , "indie" , "jazz" , "latin" , "metal" , "pop" , "punk" , "r&b" , "rap" , "reggae" , "rock" , "soul" , "alternative", "soundtrack" , "worship"]
-    #generic_genres = ["rock","pop","hip hop","rap","indie","jazz","country","folk","alternative","metal","soul","blues","classic","classical","latin","dance","punk","house","contemporary"]
+    #generic_genres = ["blues", "trap", "electro", "house", "dance", "swing" , "orchestra", "cumbia" , "dub", "gospel", "bebop", "bolero", "hardcore", "chanson" ,"adult standards" , "broadway" , "chill" , "classical" , "comedy" , "country", "disco" , "edm" , "emo" , "folk" , "funk" , "hip hop" , "indie" , "jazz" , "latin" , "metal" , "pop" , "punk" , "r&b" , "rap" , "reggae" , "rock" , "soul" , "alternative", "soundtrack" , "worship"]
+    #generic_genres = ["rock","pop","hip hop","rap","indie","jazz","country","folk","metal","soul","blues","classical","latin","dance","punk","house","trap","funk","r&b","roots","christian","reggae","tropical","worship","emo","edm","swing","electro","adult standards","disco","electropop","americana","garage"]
+
 
     generic_genres_dict = {}
 
@@ -186,8 +186,225 @@ def find_most_relevant_genre(genres: list):
     '''
 
 
+def read_genres_(data):
+    end = len(data.index)
+    sum_others = 0
+    i = 1
+    others = []
+    others_temp = []
+
+    for index, row in data.iterrows():
+        """
+        genre_list = eval(row["genres"])
+        if len(genre_list) > 0:
+            assigned_genre, others_temp = assign_super_genre(genre_list)
+            if assigned_genre == "other":
+                others.append(others_temp)
+                sum_others += 1
+        """
 
 
+        assigned_genre = data.iloc[index].genres
+        #METAL
+        if assigned_genre == "metal":
+            song = data.iloc[index]
+            if ((song["acousticness"] < 0.1) | 
+            (song["danceability"] < 0.5) | 
+            (song["energy"] > 0.75) | 
+            (song["liveness"] < 0.4) | 
+            (song["loudness"] > -10) | 
+            (song["speechiness"] < 0.15) | 
+            (song["valence"] < 0.6)):
+                data['genres'].iloc[index] = assigned_genre
+            else:
+                data['genres'].iloc[index] = "NO_PARAMETER_FIT"
+
+
+        #PUNK
+        elif assigned_genre == "punk":
+            song = data.iloc[index]
+            if ((song["acousticness"] < 0.3) | 
+            (song["danceability"] < 0.6) | 
+            (song["energy"] > 0.6) | 
+            (song["instrumentalness"] < 0.5) | 
+            (song["liveness"] < 0.4) | 
+            (song["loudness"] > -14) | 
+            (song["speechiness"] < 0.2)):
+                data['genres'].iloc[index] = assigned_genre
+            else:
+                data['genres'].iloc[index] = "NO_PARAMETER_FIT"
+
+
+        #BLUES
+        elif assigned_genre == "blues":
+            song = data.iloc[index]
+            if ((song["instrumentalness"] < 0.05) | 
+            (song["liveness"] < 0.3) | 
+            (song["loudness"] > -14) | 
+            (song["speechiness"] < 0.2) | 
+            (song["valence"] > 0.3)):
+                data['genres'].iloc[index] = assigned_genre
+            else:
+                data['genres'].iloc[index] = "NO_PARAMETER_FIT"
+
+        #JAZZ
+        elif assigned_genre == "jazz":
+            song = data.iloc[index]
+            if ((song["acousticness"] > 0.4) | 
+            (song["danceability"] > 0.4) | 
+            (song["energy"] > 0.2) | 
+            (song["instrumentalness"] < 0.8) | 
+            (song["liveness"] < 0.3) | 
+            (song["loudness"] > -20) | 
+            (song["speechiness"] < 0.1) |
+            (song["popularity"] > 20)):
+                data['genres'].iloc[index] = assigned_genre
+            else:
+                data['genres'].iloc[index] = "NO_PARAMETER_FIT"
+
+
+        #CLASSICAL
+        elif assigned_genre == "classical":
+            song = data.iloc[index]
+            if ((song["acousticness"] > 0.7) | 
+            (song["danceability"] < 0.5) | 
+            (song["energy"] < 0.5) | 
+            (song["instrumentalness"] > 0.4) | 
+            (song["liveness"] < 0.3) | 
+            (song["loudness"] < -10) | 
+            (song["speechiness"] < 0.1) | 
+            (song["valence"] < 0.5) | 
+            (song["popularity"] < 0.6)):
+                data['genres'].iloc[index] = assigned_genre
+            else:
+                data['genres'].iloc[index] = "NO_PARAMETER_FIT"
+
+
+        #LATINO
+        elif assigned_genre == "latino":
+            song = data.iloc[index]
+            if ((song["acousticness"] < 0.6) | 
+            (song["danceability"] > 0.5) | 
+            (song["energy"] > 0.5) | 
+            (song["instrumentalness"] < 0.1) | 
+            (song["liveness"] < 0.3) | 
+            (song["valence"] > 0.6) | 
+            (song["popularity"] > 30)):
+                data['genres'].iloc[index] = assigned_genre
+            else:
+                data['genres'].iloc[index] = "NO_PARAMETER_FIT"
+        
+        #COUNTRY
+        elif assigned_genre == "country":
+            song = data.iloc[index]
+            if ((song["acousticness"] > 0.2) | 
+            (song["danceability"] > 0.5) | 
+            (song["energy"] > 0.4) | 
+            (song["instrumentalness"] < 0.02) | 
+            (song["liveness"] < 0.3) | 
+            (song["speechiness"] < 0.1) |
+            (song["valence"] < 0.7)): 
+                data['genres'].iloc[index] = assigned_genre
+            else:
+                data['genres'].iloc[index] = "NO_PARAMETER_FIT"
+        
+        #HIP-HOP/RAP
+        elif assigned_genre == "hip-hop/rap":
+            song = data.iloc[index]
+            if ((song["acousticness"] < 0.3) | 
+            (song["danceability"] > 0.6) | 
+            (song["energy"] > 0.5) | 
+            (song["instrumentalness"] < 0.1) | 
+            (song["liveness"] < 0.4) | 
+            (song["speechiness"] < 0.4) | 
+            (song["valence"] > 0.4) | 
+            (song["popularity"] > 40)):
+                data['genres'].iloc[index] = assigned_genre
+            else:
+                data['genres'].iloc[index] = "NO_PARAMETER_FIT"
+        
+        #FOLK
+        elif assigned_genre == "folk":
+            song = data.iloc[index]
+            if ((song["acousticness"] > 0.6) | 
+            (song["danceability"] > 0.4) | 
+            (song["energy"] > 0.15) | 
+            (song["instrumentalness"] < 0.3) | 
+            (song["liveness"] < 0.3) | 
+            (song["loudness"] > -20) | 
+            (song["speechiness"] < 0.1) | 
+            (song["valence"] > 0.5)):
+                data['genres'].iloc[index] = assigned_genre
+            else:
+                data['genres'].iloc[index] = "NO_PARAMETER_FIT"
+
+        #TALK
+        else:
+            if data['speechiness'].iloc[index] > 0.5:
+                data['genres'].iloc[index] = "talk"
+            else:
+                data['genres'].iloc[index] = assigned_genre
+        #else:
+        #    data["genres"].iloc[index] = "NO_ASSIGNED_GENRE"
+        
+        sys.stdout.write("\033[F") #back to previous line 
+        sys.stdout.write("\033[K") #clear line 
+        print((i/end)*100)
+        i += 1
+
+    #indexEmpty = data[(data["genres"] == "NO_ASSIGNED_GENRE") | (data["genres"] == "NO_PARAMETER_FIT")].index
+    #data.drop(indexEmpty, inplace=True)
+    
+
+    #data = deal_with_others(data)
+
+    #print("-"*30)
+    #print("NUM OF OTHERS: ")
+    #print(sum_others)
+    #print("-"*30)
+    #print(data)
+    #print(others)
+
+    data.to_pickle('data.pkl')
+
+def assign_super_genre(genres: list):
+     
+    super_genres_dict = {
+        "metal": ["metal", "grindcore", "metalcore", "nu-metalcore", "thrash", "power metal"],
+        "punk": ["punk", "anarcho-punk", "cowpunk", "oi"],
+        "blues": ["blues", "boogie-woogie", "boogie"],
+        "jazz": ["jazz", "swing", "bop", "ragtime", "dixieland", "schlager"],
+        "classical": ["orchestra", "orchestral", "classical", "baroque", "chamber", "renaissance", "piano", "romantic", "romanticism", "symphony", "violin"],
+        "latino": ["latino", "mariachi", "reggaeton", "cumbia", "salsa", "cha-cha-cha", "tango", "bachata", "mexican", "samba", "merenge", "flamenco", "rumba", "cuban", "latin"],
+        "r&b/soul": ["r&b", "soul", "disco", "doo-wop", "funk", "motown", "rhythm and blues"],
+        "country": ["country", "bluegrass", "honky tonk", "honky tonk", "americana", "redneck"],
+        "reggae": ["reggae", "roots reggae", "dub", "lovers rock"],
+        "hip-hop/rap": ["rap", "hip hop", "bounce"],
+        "edm": ["breakbeat", "dance", "grime", "dubstep", "electronic", "eurodance", "eurobeat", "house", "edm", "dnb", "drum and bass", "jungle", "techno", "trance", "chillhop", "lo-fi"],
+        "folk": ["folk", "polka"],
+        "rock": ["rock", "post-grunge", "grunge"],
+        "pop": ["britpop", "pop"],
+        "adult standards": ["adult standards"],
+        "talk": ["comedy", "poetry", "reading"],
+    }
+
+    super_genres_dict_scores = {}
+
+    for super_genre in super_genres_dict:
+        super_genres_dict_scores[super_genre] = 0
+        for sub_genre in super_genres_dict[super_genre]:
+            for genre in genres:
+                if sub_genre in genre:
+                    super_genres_dict_scores[super_genre] += 1
+
+    most_relevant_genre = max(super_genres_dict_scores, key=super_genres_dict_scores.get)
+
+    if super_genres_dict_scores[most_relevant_genre] != 0:
+        return most_relevant_genre, []
+    else:
+        return "other", genres
+
+#def deal_with_others(data: pd.DataFrame):
 
 
 #ova funkcija je koristena samo da bi izlistali zanrove koji se najcesce pojavljuju u "other" kako bi ih mogli dodati u generalne zarove
@@ -292,7 +509,7 @@ def dana_genre(data):
     return x, y
 
 def do_PCA(n_comp, x_train, x_test):
-    pca = PCA(n_components=n_comp)
+    pca = PCA(n_components=n_comp, whiten=True)
     pca.fit(x_train)
     train = pca.transform(x_train)
     test = pca.transform(x_test)
@@ -316,65 +533,81 @@ def find_genre_by_artist(artist, genre_df):
     if genre_df.loc[artist_index, "genres"].size != 0:
         return genre_df.loc[artist_index, "genres"].iloc[0]
     else:
-        return "other"
+        return "NO_ASSIGNED_GENRE"
 
-def add_generic_genres_to_data():
-    whole_data_w_genres = whole_data
+def add_generic_genres_to_data(data_w_generes, whole_data_wo_generes):
+    whole_data_w_genres = whole_data_wo_generes
 
     end = len(whole_data_w_genres.index)
     i = 1
     for index_entry, value_entry in whole_data_w_genres.iterrows():
         artists_str = whole_data_w_genres.loc[index_entry, "artists"]
         artist_list = eval(artists_str)
-        whole_data_w_genres.loc[index_entry, "genres"] = find_genre_by_artist(artist_list[0], data)
+        whole_data_w_genres.loc[index_entry, "genres"] = find_genre_by_artist(artist_list[0], data_w_generes)
         sys.stdout.write("\033[F") #back to previous line 
         sys.stdout.write("\033[K") #clear line 
         print((i/end)*100)
         i += 1
-    
 
+    indexEmpty = whole_data_w_genres[whole_data_w_genres["genres"] == "NO_ASSIGNED_GENRE"].index
+    whole_data_w_genres.drop(indexEmpty, inplace=True)
 
-    whole_data_w_genres.to_csv("data_w_added_genres.csv")
+    whole_data_w_genres.to_csv("data_w_added_genres_1.csv")
 
     print("* Finished with adding genres pardner!")
 
-    print("Here's the result: ")
-    print(whole_data_w_genres)
-    data = whole_data_w_genres
 
 if __name__ == "__main__":
     pd.options.mode.chained_assignment = None
     #read_genres()
-    #data = pd.read_pickle('data.pkl')
-    
-    data = pd.read_csv('data_w_added_genres.csv')
+    #data__ = pd.read_csv("data_w_genres.csv")
+    #read_genres_(data__)
+    #data_w_genres = pd.read_pickle('data.pkl')
+    #whole_data_wo_genres = pd.read_csv('data.csv')
+    #data = add_generic_genres_to_data(data_w_genres, whole_data_wo_genres) 
+    dataa = pd.read_csv("data_w_added_genres_1.csv")
+    read_genres_(dataa)
+    data = pd.read_pickle("data.pkl")
     print("* Done readin' feller!")
     
-  
-    print("* Startin' classification")
-
+    #print("* Startin' classification")
+    #data = pd.read_pickle("data.pkl")
     #print(len(data['genres'].unique().tolist()))
     
     
 
-    print(data[(data.genres == "rock")].mean())
-    plt.scatter(data["energy"], data["loudness"])
+    #print(data[(data.genres == "rock")].mean())
+    #plt.scatter(data["energy"], data["loudness"])
+
+    #data_ = data[(data["genres"].str.contains("funk")) & (~data["genres"].str.contains("rock")) & (~data["genres"].str.contains("metal")) & (~data["genres"].str.contains("breaks"))]
+    #data_ = data[(data["genres"].str.contains("house")) ^ (data["genres"].str.contains("techno")) ^ (data["genres"].str.contains("trance")) ^ (data["genres"].str.contains("dubstep")) ^ (data["genres"].str.contains("drum and bass")) ^ (data["genres"].str.contains("dnb")) ^ (data["genres"].str.contains("hardstyle"))]
+    #data_ = data[data["genres"].str.contains("disco")]
+    #data_ = data[(data["speechiness"] > 0.4) & (data["liveness"] > 0.1)]
+
+    #print(data_)
+    #print(data_.describe())
+
     #for i in range(1, 14):
-     #   plt.scatter(data.iloc[:, i], data.iloc[:, i+1])
-    #plt.show()
+        #plt.hist(data_.iloc[:, i])
+        #plt.show()
     
 
 
+  
     data = data.drop(columns=['artists'])
     x_train = data[
         ["danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness",
-         "valence", "tempo", "liveness"]]
+         "valence", "tempo", "liveness", "popularity"]]
+
+
+    
     y_train = data['genres']
     #x_train, y_train = dana_genre(data)
     x_train = normalize(x_train)
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, stratify=y_train, test_size=0.2)
+    print("* Done splittin'")
 
-  
+    
     """ 
     #HEATMAP
     fig = plt.figure(figsize=(13,6))
@@ -382,16 +615,15 @@ if __name__ == "__main__":
     ax1 = fig.add_subplot(111)
     ax1.set_xticklabels(labels,rotation=90, fontsize=10)
     ax1.set_yticklabels(labels,fontsize=10)
-    plt.imshow(x_train.corr(), cmap='hot', interpolation='nearest')
+    plt.imshow(x_train.corr(), cmap='bwr', interpolation='nearest')
     plt.colorbar()
     ax1.set_xticks(np.arange(len(labels)))
     ax1.set_yticks(np.arange(len(labels)))
     plt.show()
     
 
+    """
 
-
-      """
   
 
     """
@@ -412,14 +644,9 @@ if __name__ == "__main__":
     """
     
 
-
-
-    #print(x_train)
-    #print(x_test)
-    
-    
     #PCA
-    #x_train, x_test = do_PCA(8, x_train, x_test)
+    #x_train, x_test = do_PCA(4, x_train, x_test)
+    #print("* Done PCA-in'")
 
     #classifier =  SVC(kernel='linear',gamma=0.01, C=0.01)
     #classifier = GradientBoostingClassifier(max_depth=3, n_estimators=700)
@@ -427,6 +654,14 @@ if __name__ == "__main__":
     #classifier = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=3), n_estimators=4)
     #classifier = KNeighborsClassifier(n_neighbors=1)
     
+    
+   
+
+    classifier.fit(x_train, y_train)
+    y_pred = classifier.predict(x_test)
+    acc = accuracy_score(y_test, y_pred)
+    print(acc)
+    """
     #title = "Learning curve"
     #cv = ShuffleSplit(n_splits=10, test_size=0.2, random_state=0)
     #fig, axes = plt.subplots(3, 2, figsize=(10, 15))
@@ -434,11 +669,6 @@ if __name__ == "__main__":
 
     #plt.show()
 
-    classifier.fit(x_train, y_train)
-    print(classifier.score(x_train,y_train))
-    y_pred = classifier.predict(x_test)
-    acc = accuracy_score(y_test, y_pred)
-    print(acc)
 
     x_ext, other_ext = read_ext_data("data.csv")
 
@@ -451,7 +681,6 @@ if __name__ == "__main__":
     other_ext.to_csv("predicted_data.csv")
     print(other_ext.nunique())
 
-    """
     
     """
     
